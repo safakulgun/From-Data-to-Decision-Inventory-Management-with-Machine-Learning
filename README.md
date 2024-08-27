@@ -150,3 +150,5 @@ plt.subplot(1, 3, 3)
 inventory_df['Ship Mode'].value_counts().plot.pie(autopct='%1.1f%%')
 plt.title('Ship Mode')
 plt.show()
+
+![Figure_4](https://github.com/user-attachments/assets/40b65ab7-9786-4492-b725-1ca6be17984e)
