@@ -51,7 +51,7 @@ inventory_df.info()
 
 <img width="433" alt="Screenshot 2024-08-27 at 17 26 55" src="https://github.com/user-attachments/assets/4363e128-6b58-4332-9e4e-349ede875d73">
 
-#Converting categorical variables into factors
+##Converting categorical variables into factors
 
 
 inventory_df['Ship Mode'] = inventory_df['Ship Mode'].astype('category')
@@ -72,7 +72,7 @@ inventory_df.info()
 
 <img width="433" alt="Screenshot 2024-08-27 at 17 42 17" src="https://github.com/user-attachments/assets/e29299e6-9376-4eb7-8c09-ebce9068a2d6">
 
-#Check for outliers
+## Check for outliers
 
 plt.figure(figsize=(10, 5))
 
@@ -82,7 +82,7 @@ plt.show()
 
 ![Figure_1](https://github.com/user-attachments/assets/76a807f5-824a-4236-8deb-92c3cdaed30f)
 
-#Outlier Treatment
+## Outlier Treatment
 
 def outlier_capping(x):
 
@@ -115,7 +115,7 @@ plt.title("Sales Column After Outlier Capping")
 plt.show()    
 ![Figure_2](https://github.com/user-attachments/assets/97dea136-14f7-4694-8b1f-3ee6c8150507)
 
-#Univariate - Histograms
+## Univariate - Histograms
 
 plt.figure(figsize=(12, 6))
 
@@ -167,7 +167,7 @@ inventory_df['Ship.Mode'] = le.fit_transform(inventory_df['Ship.Mode'])
 
 inventory_df['Ship.Mode']
 
-# Analyzing the Class Proportions in the 'Ship Mode' Column
+## Analyzing the Class Proportions in the 'Ship Mode' Column
 
 class_counts = inventory_df['Ship.Mode'].value_counts(normalize=True)
 
@@ -191,4 +191,132 @@ plt.show()
 
 # Comment: There is a significant imbalance in the Ship.Mode column. Class 2 has far more examples compared to the other two classes. This imbalance is a factor that needs to be considered during modeling. For instance, due to this imbalance, your model might predict class 2 more heavily and potentially neglect the other classes. 
 
-#We will use the SMOTE technique to help the model learn all classes more effectively
+# We will use the SMOTE technique to help the model learn all classes more effectively
+
+## MODEL
+
+# 1. Multinomial Logistic Regression Model
+
+from sklearn.linear_model import LogisticRegression
+
+from sklearn.preprocessing import StandardScaler
+
+# Scale the features
+
+scaler = StandardScaler()
+
+X_train_res = scaler.fit_transform(X_train_res)
+
+X_test = scaler.transform(X_test)
+
+# Define and train the model
+
+lr = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=2000, random_state=42)
+
+lr.fit(X_train_res, y_train_res)
+
+train_pred_lr = lr.predict(X_train_res)
+
+test_pred_lr = lr.predict(X_test)
+
+# Compute the confusion matrix and all the statistics
+
+print("Logistic Regression Train Confusion Matrix:\n", confusion_matrix(y_train_res, train_pred_lr))
+
+print("Logistic Regression Test Confusion Matrix:\n", confusion_matrix(y_test, test_pred_lr))
+
+print("Logistic Regression Test Classification Report:\n", classification_report(y_test, test_pred_lr))
+
+<img width="561" alt="Screenshot 2024-08-29 at 20 29 38" src="https://github.com/user-attachments/assets/1c97482a-08f7-4413-89c7-dcbf1ed67088">
+
+# 2. Support Vector Machine (SVM)
+
+svm_model = SVC(kernel='rbf', gamma=0.1, C=10, random_state=980)
+
+svm_model.fit(X_train_res, y_train_res)
+
+y_train_pred = svm_model.predict(X_train_res)
+
+y_test_pred = svm_model.predict(X_test)
+
+print("SVM Accuracy on Train Data: ", accuracy_score(y_train_res, y_train_pred))
+
+print("SVM Accuracy on Test Data: ", accuracy_score(y_test, y_test_pred))
+
+print(confusion_matrix(y_test, y_test_pred))
+
+print(classification_report(y_test, y_test_pred))
+
+<img width="561" alt="Screenshot 2024-08-29 at 20 34 17" src="https://github.com/user-attachments/assets/a4686823-5aab-43c4-9cb6-e9f235bb79e0">
+
+# 3. Bagging
+
+bagging_model = BaggingClassifier(estimator=DecisionTreeClassifier(max_depth=5, min_samples_split=15),
+                                  n_estimators=10, random_state=42)
+bagging_model.fit(X_train, y_train)
+
+y_train_pred = bagging_model.predict(X_train)
+
+y_test_pred = bagging_model.predict(X_test)
+
+
+print("Bagging Accuracy on Train Data: ", accuracy_score(y_train, y_train_pred))
+
+print("Bagging Accuracy on Test Data: ", accuracy_score(y_test, y_test_pred))
+
+print(confusion_matrix(y_test, y_test_pred))
+
+
+print(classification_report(y_test, y_test_pred))
+
+<img width="561" alt="Screenshot 2024-08-29 at 20 35 32" src="https://github.com/user-attachments/assets/3f8b7821-21e6-44c2-b083-bf2ae0edc24c">
+
+# 4. Decision Tree
+
+dt_model = DecisionTreeClassifier(min_samples_split=125, min_samples_leaf=172, ccp_alpha=0.33, 
+random_state=980)
+
+dt_model.fit(X_train, y_train)
+
+y_train_pred = dt_model.predict(X_train)
+
+y_test_pred = dt_model.predict(X_test)
+
+print("Decision Tree Accuracy on Train Data: ", accuracy_score(y_train, y_train_pred))
+
+print("Decision Tree Accuracy on Test Data: ", accuracy_score(y_test, y_test_pred))
+
+print(confusion_matrix(y_test, y_test_pred))
+
+print(classification_report(y_test, y_test_pred))
+
+<img width="561" alt="Screenshot 2024-08-29 at 20 53 02" src="https://github.com/user-attachments/assets/c4508730-62c5-4e98-9a1c-7b48c99f5fa1">
+
+# 5. Random Forest (on SMOTE balanced data)
+
+rf_model = RandomForestClassifier(max_features=22, n_estimators=300, random_state=980)
+
+rf_model.fit(X_train_res, y_train_res)
+
+
+y_train_pred = rf_model.predict(X_train_res)
+
+y_test_pred = rf_model.predict(X_test)
+
+
+print("Random Forest Accuracy on Train Data: ", accuracy_score(y_train_res, y_train_pred))
+
+print("Random Forest Accuracy on Test Data: ", accuracy_score(y_test, y_test_pred))
+
+
+print(confusion_matrix(y_test, y_test_pred))
+
+print(classification_report(y_test, y_test_pred))
+
+Random Forest Accuracy on Train Data:  0.9968065693430657
+
+Random Forest Accuracy on Test Data:  0.825356415478615
+
+<img width="561" alt="Screenshot 2024-08-29 at 21 03 25" src="https://github.com/user-attachments/assets/6c9b80a1-713d-4cbc-b5c6-2a6689176b23">
+
+
