@@ -152,3 +152,43 @@ plt.title('Ship Mode')
 plt.show()
 
 ![Figure_4](https://github.com/user-attachments/assets/40b65ab7-9786-4492-b725-1ca6be17984e)
+
+#Fixing Spaces and Other Characters in Domain Names
+
+inventory_df.columns = inventory_df.columns.str.replace(' ', '.').str.replace(',', '').str.replace('-', '')
+
+#Converting the 'Ship Mode' Column to Numeric
+
+from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+
+inventory_df['Ship.Mode'] = le.fit_transform(inventory_df['Ship.Mode'])
+
+inventory_df['Ship.Mode']
+
+# Analyzing the Class Proportions in the 'Ship Mode' Column
+
+class_counts = inventory_df['Ship.Mode'].value_counts(normalize=True)
+
+print(class_counts)
+
+out:
+
+2    0.747358
+
+0    0.135362
+
+1    0.117280
+
+#%74.74: Regular Air , %13.54: Delivery Truck , %11.73: Express Air
+
+class_counts.plot(kind='bar', title='Class Distribution in Ship Mode')
+
+plt.show()
+
+![Figure_5](https://github.com/user-attachments/assets/1931eb10-2ce6-495c-8a05-42c0998613bd)
+
+# Comment: There is a significant imbalance in the Ship.Mode column. Class 2 has far more examples compared to the other two classes. This imbalance is a factor that needs to be considered during modeling. For instance, due to this imbalance, your model might predict class 2 more heavily and potentially neglect the other classes. 
+
+#We will use the SMOTE technique to help the model learn all classes more effectively
