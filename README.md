@@ -319,4 +319,58 @@ Random Forest Accuracy on Test Data:  0.825356415478615
 
 <img width="561" alt="Screenshot 2024-08-29 at 21 03 25" src="https://github.com/user-attachments/assets/6c9b80a1-713d-4cbc-b5c6-2a6689176b23">
 
+# 6. Gradient Boosting
 
+from sklearn.ensemble import GradientBoostingClassifier
+
+from sklearn.model_selection import GridSearchCV
+
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+
+gb_model = GradientBoostingClassifier(random_state=42)
+
+
+param_grid = {
+
+    'n_estimators': [100, 500, 1000, 5000, 10000],
+    
+    'learning_rate': [0.001, 0.01, 0.1, 1.0],
+
+}
+
+
+grid_search = GridSearchCV(estimator=gb_model, param_grid=param_grid, cv=5, scoring='accuracy', n_jobs=-1)
+
+
+grid_search.fit(X_train_res, y_train_res)
+
+
+print("Best Parameters:", grid_search.best_params_)
+
+print("Best Score:", grid_search.best_score_)
+
+
+best_gb_model = grid_search.best_estimator_
+
+
+y_train_pred = best_gb_model.predict(X_train_res)
+
+y_test_pred = best_gb_model.predict(X_test)
+
+
+print("Gradient Boosting Accuracy on Train Data: ", accuracy_score(y_train_res, y_train_pred))
+
+print("Gradient Boosting Accuracy on Test Data: ", accuracy_score
+y_test, y_test_pred))
+
+print("Confusion Matrix:")
+
+print(confusion_matrix(y_test, y_test_pred))
+
+print("Classification Report:")
+
+print(classification_report(y_test, y_test_pred))
+
+
+<img width="756" alt="Screenshot 2024-08-30 at 21 17 12" src="https://github.com/user-attachments/assets/b966a890-dff9-4a2a-84e9-89fce44978ea">
